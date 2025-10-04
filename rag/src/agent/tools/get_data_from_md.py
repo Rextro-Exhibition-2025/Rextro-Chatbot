@@ -11,13 +11,12 @@ config = get_config()
 # Regex pattern to extract YouTube timestamps like [123.45s]
 timestamp_pattern = r"\[(\d+\.?\d*)s\]"
 
-
-def get_chunks(query_text: str) -> str:
+def get_data_from_md(query_text: str) -> str:
     """
     Searches a vector database for text chunks similar to the input query.
-    Returns the top 7 most relevant chunks as a formatted string.
+    Returns the top 10 most relevant chunks as a formatted string.
     """
-    print(f"Tool 'get_chunks' called with query: '{query_text}'")
+    print(f"Tool 'get_data_from_md' called with query: '{query_text}'")
 
     if not query_text:
         return "Error: A query text must be provided."
@@ -25,7 +24,7 @@ def get_chunks(query_text: str) -> str:
     try:
         # Initialize database connection and embedding model
         db_connection = DatabaseConnection()
-        embed_model =  OpenAIEmbedding(model="text-embedding-3-small", embed_dim=1536)
+        embed_model = OpenAIEmbedding(model="text-embedding-3-small", embed_dim=1536)
 
         # Query vector database
         results = db_connection.query_vector_store(
@@ -58,21 +57,19 @@ def get_chunks(query_text: str) -> str:
             formatted_output += f"URL: {url}\n"
             formatted_output += f"Content: {content}\n\n"
 
-        
         return formatted_output.strip()
 
     except Exception as e:
-        print(f"Error in get_chunks tool: {e}")
+        print(f"Error in get_data_from_md tool: {e}")
         return f"An error occurred while trying to retrieve text chunks: {e}"
 
-
 # Create FunctionTool for llama_index
-get_chunks_tool = FunctionTool.from_defaults(
-    fn=get_chunks,
-    name="get_similar_text_chunks",
+get_data_from_md_tool = FunctionTool.from_defaults(
+    fn=get_data_from_md,
+    name="get_data_from_md",
     description=(
-        "Use this tool to search the knowledge base for information to answer a user's query. "
-        "It queries a vector database and returns a single formatted string containing the most relevant text chunks. "
-        "Each chunk explicitly includes its content, source, URL, and title, which you can use to formulate your answer."
+        "Use this tool to search the markdown-based knowledge base for information relevant to a user's query. "
+        "It queries a vector database and returns a formatted string containing the most relevant text chunks. "
+        "Each chunk includes its content, source, URL, and title, which you can use to construct your answer."
     )
 )
