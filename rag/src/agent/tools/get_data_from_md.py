@@ -30,7 +30,7 @@ get_data_from_md_tool = FunctionTool.from_defaults(
     fn=get_data_from_md,
     name="get_data_from_md",
     description=(
-        "Use this tool to retrieve the full content of a markdown file. "
+        "Use this tool to retrieve the full content about Rextro Exhibition of a markdown file. "
         "It ignores the query text and simply returns the raw text from the file."
     )
 )
