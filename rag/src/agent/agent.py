@@ -13,7 +13,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 
 
 from config.config import get_config
-from .tools.get_data_from_md import get_chunks_tool
+from .tools.get_data_from_md import get_data_from_md
 
 
 load_dotenv()
@@ -97,7 +97,7 @@ async def run_agent_async(query: str) -> KnowledgeResponse:
  
 
     tools = [
-        get_chunks_tool 
+        get_data_from_md 
     ]
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=3900)
