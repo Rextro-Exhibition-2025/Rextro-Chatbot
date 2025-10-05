@@ -1,0 +1,34 @@
+name: Deploy FastAPI to Docker Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy project files to server
+        run: |
+          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 "mkdir -p ~/fastapi_app"
+          rsync -avz --exclude '.git' ./ chamara@51.195.119.138:~/fastapi_app/
+
+      - name: Deploy new container
+        run: |
+          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << 'EOF'
+          cd ~/fastapi_app
+          docker stop fastapi_app || true
+          docker rm fastapi_app || true
+          docker build -t fastapi_app .
+          docker run -d -p 8000:8000 --name fastapi_app fastapi_app
+          EOF
