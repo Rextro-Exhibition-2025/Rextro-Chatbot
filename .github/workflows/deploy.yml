@@ -40,20 +40,17 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << 'EOF'
-            # Stop existing container (ignore errors)
-            echo "$SERVER_PASSWORD" | sudo -S docker stop rextro_agent || true
-            echo "$SERVER_PASSWORD" | sudo -S docker rm rextro_agent || true
+            # Stop, remove old container (ignore errors)
+            docker stop rextro_agent || true
+            docker rm rextro_agent || true
 
             # Pull new image
-            echo "$SERVER_PASSWORD" | sudo -S docker pull $DOCKER_USERNAME/rextro_agent:latest
+            docker pull $DOCKER_USERNAME/rextro_agent:latest
 
             # Run new container
-            echo "$SERVER_PASSWORD" | sudo -S docker run -d \
-              -p 8000:8000 \
-              --name rextro_agent \
+            docker run -d -p 8000:8000 --name rextro_agent \
               -e OPENAI_API_KEY="$OPENAI_API_KEY" \
               --restart unless-stopped \
               $DOCKER_USERNAME/rextro_agent:latest
