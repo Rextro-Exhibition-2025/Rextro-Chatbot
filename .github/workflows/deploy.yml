@@ -21,14 +21,19 @@ jobs:
       - name: Copy project files to server
         run: |
           ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 "mkdir -p ~/fastapi_app"
-          rsync -avz --exclude '.git' ./ chamara@51.195.119.138:~/fastapi_app/
+          rsync -avz --exclude '.git' ./rag/ chamara@51.195.119.138:~/fastapi_app/
 
       - name: Deploy new container
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << 'EOF'
+          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << EOF
           cd ~/fastapi_app
           sudo docker stop fastapi_app || true
           sudo docker rm fastapi_app || true
           sudo docker build -t fastapi_app .
-          sudo docker run -d -p 8000:8000 --name fastapi_app fastapi_app
+          sudo docker run -d -p 8000:8000 --name fastapi_app \
+            -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+            --restart unless-stopped \
+            fastapi_app
           EOF
