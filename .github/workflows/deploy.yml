@@ -27,26 +27,28 @@ jobs:
         with:
           context: ./rag
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/fastapi_app:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/fastapi_app:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/fastapi_app:buildcache,mode=max
+          tags: ${{ secrets.DOCKER_USERNAME }}/rextro_agent:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/rextro_agent:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/rextro_agent:buildcache,mode=max
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+
       - name: Deploy container on server
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
-          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << EOF
-          sudo docker stop fastapi_app || true
-          sudo docker rm fastapi_app || true
-          sudo docker pull $DOCKER_USERNAME/fastapi_app:latest
-          sudo docker run -d -p 8000:8000 --name fastapi_app \
+          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << 'EOF'
+          echo "$SERVER_PASSWORD" | sudo -S docker stop rextro_agent || true
+          echo "$SERVER_PASSWORD" | sudo -S docker rm rextro_agent || true
+          echo "$SERVER_PASSWORD" | sudo -S docker pull $DOCKER_USERNAME/rextro_agent:latest
+          echo "$SERVER_PASSWORD" | sudo -S docker run -d -p 8000:8000 --name rextro_agent \
             -e OPENAI_API_KEY="$OPENAI_API_KEY" \
             --restart unless-stopped \
-            $DOCKER_USERNAME/fastapi_app:latest
+            $DOCKER_USERNAME/rextro_agent:latest
           EOF
