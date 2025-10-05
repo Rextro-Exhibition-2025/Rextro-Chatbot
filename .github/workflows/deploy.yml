@@ -13,27 +13,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./rag
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/fastapi_app:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/fastapi_app:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/fastapi_app:buildcache,mode=max
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy project files to server
-        run: |
-          ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 "mkdir -p ~/fastapi_app"
-          rsync -avz --exclude '.git' ./rag/ chamara@51.195.119.138:~/fastapi_app/
-
-      - name: Deploy new container
+      - name: Deploy container on server
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           ssh -o StrictHostKeyChecking=no chamara@51.195.119.138 << EOF
-          cd ~/fastapi_app
           sudo docker stop fastapi_app || true
           sudo docker rm fastapi_app || true
-          sudo docker build -t fastapi_app .
+          sudo docker pull $DOCKER_USERNAME/fastapi_app:latest
           sudo docker run -d -p 8000:8000 --name fastapi_app \
             -e OPENAI_API_KEY="$OPENAI_API_KEY" \
             --restart unless-stopped \
-            fastapi_app
+            $DOCKER_USERNAME/fastapi_app:latest
           EOF
