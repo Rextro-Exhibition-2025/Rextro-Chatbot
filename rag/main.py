@@ -62,8 +62,9 @@ async def ask_agent(request: Request, query_request: QueryRequest):
     return {"answer": answer}
 
 @app.get("/")
-def health_check():
-    """Health check endpoint."""
+async def health_check():
+    """Health check endpoint with 10s delay."""
+    await asyncio.sleep(15)
     return {"status": "ok", "message": "Agentic RAG API is running"}
 
 # --- Main Execution ---
