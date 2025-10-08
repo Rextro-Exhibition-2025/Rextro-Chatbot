@@ -17,7 +17,9 @@ from .tools.get_data_from_md import get_data_from_md
 
 
 load_dotenv()
+print("🔧 [AGENT] Loading configuration...")
 config = get_config()
+print(f"🔑 [AGENT] OpenAI API Key available: {'✅' if config.openai_api_key else '❌'}")
 
 
 class KnowledgeResponse(BaseModel):
@@ -28,11 +30,17 @@ class KnowledgeResponse(BaseModel):
 async def run_agent_async(query: str) -> KnowledgeResponse:
     """Sets up and runs the agent asynchronously using FunctionAgent."""
     
+    print(f"🤖 [AGENT] Starting agent with query: {query}")
+    print(f"📝 [AGENT] Query length: {len(query)} characters")
+    
     api_key = config.openai_api_key
     if not api_key:
+        print("❌ [AGENT] ERROR: OpenAI API key not found in config")
         raise ValueError("The OPENAI_API_KEY is not set in config.")
     
+    print("🧠 [AGENT] Initializing OpenAI LLM...")
     llm = OpenAI(model="gpt-4o", api_key=api_key)
+    print("✅ [AGENT] LLM initialized successfully")
 
     custom_system_prompt = """
                                 You are **RextroBot**, the official AI information assistant for the **Rextro Exhibition** held at the **University of Ruhuna**.
@@ -129,13 +137,17 @@ async def run_agent_async(query: str) -> KnowledgeResponse:
 
  
 
+    print("🛠️ [AGENT] Setting up tools...")
     tools = [
         get_data_from_md 
     ]
+    print(f"📋 [AGENT] Tools configured: {[tool.metadata.name if hasattr(tool, 'metadata') else str(tool) for tool in tools]}")
 
+    print("🧠 [AGENT] Initializing memory buffer...")
     memory = ChatMemoryBuffer.from_defaults(token_limit=3900)
+    print("✅ [AGENT] Memory buffer initialized")
 
-
+    print("🏗️ [AGENT] Creating FunctionAgent...")
     agent = FunctionAgent(
         tools=tools,
         llm=llm,
@@ -143,51 +155,80 @@ async def run_agent_async(query: str) -> KnowledgeResponse:
         system_prompt=custom_system_prompt,
         output_cls=KnowledgeResponse  
     )
+    print("✅ [AGENT] FunctionAgent created successfully")
 
     
 
+    print("🔄 [AGENT] Starting agent execution with retry logic...")
     max_retries = 3
+    print(f"⚙️ [AGENT] Max retries configured: {max_retries}")
     
     for attempt in range(max_retries):
+        print(f"🎯 [AGENT] Attempt {attempt + 1}/{max_retries}")
         try:
+            print("⏱️ [AGENT] Starting agent.run() with 300s timeout...")
             response = await asyncio.wait_for(
                 agent.run(user_msg=query), 
                 timeout=300
             )
+            print(f"✅ [AGENT] Agent execution completed successfully on attempt {attempt + 1}")
+            print(f"📊 [AGENT] Raw response type: {type(response)}")
+            print(f"📋 [AGENT] Raw response content: {response}")
             
             break
             
         except (ConnectionError, TimeoutError) as e:
+            print(f"🌐 [AGENT] Network/Timeout error on attempt {attempt + 1}: {type(e).__name__}: {str(e)}")
             if attempt < max_retries - 1:
                 wait_time = 2 ** attempt  # Exponential backoff
-                
+                print(f"⏳ [AGENT] Waiting {wait_time} seconds before retry...")
                 await asyncio.sleep(wait_time)
                 continue
             else:
-               
-                return KnowledgeResponse(
+                print("❌ [AGENT] All retry attempts exhausted for network/timeout errors")
+                error_response = KnowledgeResponse(
                     answer="I'm having trouble processing your request after multiple attempts. Please try again later."
                 )
+                print(f"🚨 [AGENT] Returning network error response: {error_response}")
+                return error_response
         except Exception as e:
             # Don't retry for non-transient errors
-            
-            return KnowledgeResponse(
+            print(f"❌ [AGENT] Unexpected error on attempt {attempt + 1}: {type(e).__name__}: {str(e)}")
+            import traceback
+            print(f"🔴 [AGENT] Full traceback:\n{traceback.format_exc()}")
+            error_response = KnowledgeResponse(
                 answer="I encountered an error while processing your request. Please try again or contact support."
             )
+            print(f"🚨 [AGENT] Returning general error response: {error_response}")
+            return error_response
     
+    print("🔍 [AGENT] Processing agent response...")
+    print(f"📊 [AGENT] Response type: {type(response)}")
+    print(f"📋 [AGENT] Response attributes: {dir(response)}")
+    print(f"🔍 [AGENT] Has 'structured_response' attribute: {hasattr(response, 'structured_response')}")
     
-
-  
+    if hasattr(response, "structured_response"):
+        print(f"📦 [AGENT] Structured response type: {type(response.structured_response)}")
+        print(f"📋 [AGENT] Structured response content: {response.structured_response}")
+        print(f"✅ [AGENT] Is KnowledgeResponse instance: {isinstance(response.structured_response, KnowledgeResponse)}")
+    
     if hasattr(response, "structured_response") and isinstance(response.structured_response, KnowledgeResponse):
         result = response.structured_response
+        print(f"✅ [AGENT] Using structured_response: {result}")
     else:
-        
+        print("🔄 [AGENT] Attempting to parse response as KnowledgeResponse...")
         try:
             parsed = KnowledgeResponse.parse_raw(str(response))
             result = parsed
-        except Exception:
-          
+            print(f"✅ [AGENT] Successfully parsed response: {result}")
+        except Exception as parse_error:
+            print(f"❌ [AGENT] Parse error: {type(parse_error).__name__}: {str(parse_error)}")
             response_text = str(response)
+            print(f"📝 [AGENT] Converting to string: {response_text}")
             result = KnowledgeResponse(answer=response_text)
+            print(f"🔄 [AGENT] Created fallback response: {result}")
 
+    print(f"🎯 [AGENT] Final result: {result}")
+    print(f"📤 [AGENT] Final result type: {type(result)}")
+    print(f"📝 [AGENT] Final answer: {result.answer}")
     return result
