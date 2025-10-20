@@ -20,10 +20,7 @@ class Config:
 
             
             self._openai_api_key = self._get_required_env('OPENAI_API_KEY')
-            
-
-            
-            
+            self._gemini_api_key = self._get_required_env('GEMINI_API_KEY')
 
             Config._initialized = True
 
@@ -37,10 +34,10 @@ class Config:
     @property
     def openai_api_key(self) -> str:
         return self._openai_api_key
-
-   
     
-   
+    @property
+    def gemini_api_key(self) -> str:
+        return self._gemini_api_key
 
    
 
