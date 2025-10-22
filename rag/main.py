@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from config.config import get_config
 from src.agent.agent import run_agent_async
 import os
+import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -71,14 +72,38 @@ async def ask_agent(request: Request, query_request: QueryRequest):
         error_response = {"answer": f"I encountered an error while processing your request: {str(e)}. Please try again or contact support."}
         return error_response
 
+
+def heavy_cpu_task():
+    """CPU-heavy computation (e.g., sum modulo)"""
+    result = 0
+    for i in range(10_000_000):
+        result += i % 7
+    return result
+
+def heavy_memory_task():
+    """Memory-heavy task (allocate a large list)"""
+    big_list = [0] * 50_000_000  # ~400MB
+    return sum(big_list)
+
+
+
 @app.get("/")
 async def health_check():
-    """Health check endpoint with 10s delay."""
-    await asyncio.sleep(15)
-    response = {"status": "ok", "message": "Agentic RAG API is running"}
+    """Health check with combined CPU + memory + I/O stress"""
+    # Simulate network / I/O delay
+    await asyncio.sleep(5)
+
+    # Run CPU-heavy task in thread pool
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, heavy_cpu_task)
+
+    # Run memory-heavy task in thread pool
+    await loop.run_in_executor(None, heavy_memory_task)
+
+    response = {"status": "ok", "message": "API running with heavy combined task"}
     return response
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    import uvicorn
+  
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
