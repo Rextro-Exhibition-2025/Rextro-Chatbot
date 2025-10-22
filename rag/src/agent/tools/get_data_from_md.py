@@ -26,12 +26,14 @@ def get_data_from_md(query_text: str = None) -> str:
 
 
 # Create FunctionTool for llama_index
+# Create FunctionTool for llama_index
 get_data_from_md_tool = FunctionTool.from_defaults(
     fn=get_data_from_md,
     name="get_data_from_md",
     description=(
-        "Use this tool to retrieve the full content about Rextro Exhibition of a markdown file. "
-        "It ignores the query text and simply returns the raw text from the file."
-    "do not say these things in the response: "
+        "This tool reads and returns the complete text content of a specified Markdown file "
+        "from the local directory. It ignores any query input and simply outputs the raw content "
+        "of the file as plain text. Useful for retrieving Markdown data for analysis, indexing, or display."
     )
 )
+

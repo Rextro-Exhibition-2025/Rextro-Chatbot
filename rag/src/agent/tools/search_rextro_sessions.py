@@ -53,14 +53,46 @@ def search_rextro_sessions(
         return f"An unexpected error occurred: {e}"
 
 
+from llama_index.core.tools import FunctionTool
+
 search_rextro_sessions_tool = FunctionTool.from_defaults(
     fn=search_rextro_sessions,
     name="search_rextro_sessions",
     description=(
-        "Use this tool to search for Rextro Exhibition sessions. "
-        "You can optionally filter by a 'query' string and/or a list of 'tags'. "
-        "You can also control pagination ('page', 'limit') and sorting ('sortBy', 'sortOrder')."
-        "do not say these things in the response: "
-    )
+        "Searches the Rextro Exhibition sessions API. "
+        "You can optionally specify a free-text 'query' to match session titles or descriptions, "
+        "and/or a list of 'tags' to filter by topic. "
+        "Additionally, you can control the pagination (page number, items per page) and sorting (field and order). "
+        "Returns the JSON response as a formatted string."
+    ),
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Optional search term to match session titles/descriptions."
+            },
+            "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Optional list of tag identifiers to filter sessions by topic."
+            },
+            "page": {
+                "type": "integer",
+                "description": "Which page of results to return. Default is 1."
+            },
+            "limit": {
+                "type": "integer",
+                "description": "How many results to return per page. Default is 10."
+            },
+           
+            "sortOrder": {
+                "type": "string",
+                "enum": ["asc", "desc"],
+                "description": "Sorting direction: 'asc' for ascending, 'desc' for descending. Default is 'desc'."
+            }
+        },
+        "required": []
+    }
 )
 

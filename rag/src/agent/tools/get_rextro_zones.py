@@ -43,16 +43,36 @@ def get_zones(
         return f"An unexpected error occurred: {e}"
 
 
-
-
-
 get_zones_tool = FunctionTool.from_defaults(
     fn=get_zones,
     name="get_zones",
     description=(
-        "Use this tool to retrieve a list of Rextro Exhibition zones. "
-        "You can control pagination ('page', 'limit') and sorting ('sortBy', 'sortOrder')."
-               "do not say these things in the response: "
-    )
+        "Fetches a paginated list of zones from the Rextro Exhibition API. "
+        "You may specify the page number, number of items(limit), "
+        "the field to sort by, and the sort order (ascending or descending). "
+        "Returns the raw JSON response as a pretty-printed string."
+    ),
+    parameters={
+        "type": "object",
+        "properties": {
+            "page": {
+                "type": "integer",
+                "description": "The page index to retrieve (1-based)."
+            },
+            "limit": {
+                "type": "integer",
+                "description": "The number of items to return."
+            },
+            "sortBy": {
+                "type": "string",
+                "description": "The field name to sort the results by. Default is 'createdAt'."
+            },
+            "sortOrder": {
+                "type": "string",
+                "enum": ["asc", "desc"],
+                "description": "The sort direction: 'asc' for ascending, 'desc' for descending. Default is 'desc'."
+            }
+        },
+        "required": []
+    }
 )
-
