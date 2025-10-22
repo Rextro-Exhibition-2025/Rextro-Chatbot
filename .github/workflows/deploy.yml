@@ -38,6 +38,7 @@ jobs:
 
       - name: Deploy container on server
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
@@ -47,5 +48,6 @@ jobs:
              docker pull $DOCKER_USERNAME/rextro_agent:latest && \
              docker run -d -p 8000:8000 --name rextro_agent \
                -e OPENAI_API_KEY='$OPENAI_API_KEY' \
+               -e GEMINI_API_KEY='$GEMINI_API_KEY' \
                --restart unless-stopped \
                $DOCKER_USERNAME/rextro_agent:latest"
