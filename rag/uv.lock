@@ -1413,7 +1413,7 @@ requires-dist = [
     { name = "google-auth-httplib2", specifier = ">=0.2.0" },
     { name = "google-auth-oauthlib", specifier = ">=1.2.2" },
     { name = "limits", specifier = ">=5.6.0" },
-    { name = "llama-index", specifier = ">=0.14.0" },
+    { name = "llama-index", extras = ["gemini"], specifier = ">=0.14.0" },
     { name = "llama-index-llms-gemini", specifier = ">=0.6.1" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
