@@ -13,7 +13,7 @@ from llama_index.llms.gemini import Gemini
 
 from config.config import get_config
 from .tools.search_rextro_sessions import search_rextro_sessions_tool
-from .tools.get_rextro_latest_sessions import get_latest_3_sessions_tool
+
 from .tools.get_data_from_md import get_data_from_md_tool
 from .tools.get_rextro_zones import get_zones_tool
 
@@ -176,7 +176,6 @@ You operate **only within** the Rextro Exhibition information ecosystem.
 
     tools = [
         get_data_from_md_tool ,
-        get_latest_3_sessions_tool,
         search_rextro_sessions_tool,
         get_zones_tool
     ]

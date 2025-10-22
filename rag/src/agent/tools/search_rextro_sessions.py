@@ -64,6 +64,35 @@ search_rextro_sessions_tool = FunctionTool.from_defaults(
         "and/or a list of 'tags' to filter by topic. "
         "Additionally, you can control the pagination (page number, items per page) and sorting (field and order). "
         "Returns the JSON response as a formatted string."
-    )
+    ),
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Optional search term to match session titles/descriptions."
+            },
+            "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Optional list of tag identifiers to filter sessions by topic."
+            },
+            "page": {
+                "type": "integer",
+                "description": "Which page of results to return. Default is 1."
+            },
+            "limit": {
+                "type": "integer",
+                "description": "How many results to return per page. Default is 10."
+            },
+           
+            "sortOrder": {
+                "type": "string",
+                "enum": ["asc", "desc"],
+                "description": "Sorting direction: 'asc' for ascending, 'desc' for descending. Default is 'desc'."
+            }
+        },
+        "required": []
+    }
 )
 
