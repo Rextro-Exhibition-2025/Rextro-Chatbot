@@ -51,28 +51,5 @@ get_zones_tool = FunctionTool.from_defaults(
         "You may specify the page number, number of items(limit), "
         "the field to sort by, and the sort order (ascending or descending). "
         "Returns the raw JSON response as a pretty-printed string."
-    ),
-    parameters={
-        "type": "object",
-        "properties": {
-            "page": {
-                "type": "integer",
-                "description": "The page index to retrieve (1-based)."
-            },
-            "limit": {
-                "type": "integer",
-                "description": "The number of items to return."
-            },
-            "sortBy": {
-                "type": "string",
-                "description": "The field name to sort the results by. Default is 'createdAt'."
-            },
-            "sortOrder": {
-                "type": "string",
-                "enum": ["asc", "desc"],
-                "description": "The sort direction: 'asc' for ascending, 'desc' for descending. Default is 'desc'."
-            }
-        },
-        "required": []
-    }
+    )
 )
