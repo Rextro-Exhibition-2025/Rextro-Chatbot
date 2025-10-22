@@ -52,6 +52,7 @@ get_zones_tool = FunctionTool.from_defaults(
     description=(
         "Use this tool to retrieve a list of Rextro Exhibition zones. "
         "You can control pagination ('page', 'limit') and sorting ('sortBy', 'sortOrder')."
+               "do not say these things in the response: "
     )
 )
 
