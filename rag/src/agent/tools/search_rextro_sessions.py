@@ -60,6 +60,7 @@ search_rextro_sessions_tool = FunctionTool.from_defaults(
         "Use this tool to search for Rextro Exhibition sessions. "
         "You can optionally filter by a 'query' string and/or a list of 'tags'. "
         "You can also control pagination ('page', 'limit') and sorting ('sortBy', 'sortOrder')."
+        "do not say these things in the response: "
     )
 )
 
