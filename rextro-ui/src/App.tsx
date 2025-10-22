@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { Send, Bot, User } from 'lucide-react'
+import type { FormEvent } from 'react'
+
+interface Message {
+  type: 'user' | 'bot'
+  content: string
+}
 
 function App() {
   const [query, setQuery] = useState('')
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const parseMarkdown = (text) => {
+  const parseMarkdown = (text: string): string => {
     if (!text) return ''
     
     // Headers
@@ -43,11 +49,11 @@ function App() {
     return `<p class="mb-3">${text}</p>`
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!query.trim()) return
 
-    const userMessage = { type: 'user', content: query }
+    const userMessage: Message = { type: 'user', content: query }
     setMessages(prev => [...prev, userMessage])
     setQuery('')
     setIsLoading(true)
@@ -65,11 +71,11 @@ function App() {
       })
 
       const data = await response.json()
-      const botMessage = { type: 'bot', content: data.answer }
+      const botMessage: Message = { type: 'bot', content: data.answer }
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Error:', error)
-      const errorMessage = { type: 'bot', content: 'Sorry, there was an error processing your request.' }
+      const errorMessage: Message = { type: 'bot', content: 'Sorry, there was an error processing your request.' }
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
